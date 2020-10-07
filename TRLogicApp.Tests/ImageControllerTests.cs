@@ -76,7 +76,7 @@ namespace TRLogicApp.Tests
         {
             var mock = new Mock<IRepository<ImageEntity>>();
             var controller = new ImagesController(mock.Object);
-            var result = controller.Post(new[] { _imageModels[0], _imageModels[1] }) as StatusCodeResult;
+            var result = controller.Post(new[] { _imageModels[0], _imageModels[0] }) as StatusCodeResult;
             Assert.InRange(result.StatusCode, 200, 299);
             mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Exactly(2));
         }
