@@ -21,10 +21,23 @@ namespace TRLogicApp.Tests
     {
         private ImageModel[] _imageModels = new ImageModel[]
         {
-            new ImageModel()
+            new ImageModel() // sample1 image
             {
                 Base64Data = Convert.ToBase64String(ImageConverter.FromImage(Resources.sample1))
-            }
+            },
+            new ImageModel() // sample2 image
+            {
+                Base64Data = Convert.ToBase64String(ImageConverter.FromImage(Resources.sample2))
+            },
+            new ImageModel() // url image
+            {
+                Url = "https://static.toiimg.com/photo/72975551.cms"
+            },
+            new ImageModel() // sample1 image + url image (incorrect model)
+            {
+                Base64Data = Convert.ToBase64String(ImageConverter.FromImage(Resources.sample1)),
+                Url = "https://static.toiimg.com/photo/72975551.cms"
+            },
         };
 
         [Theory]
@@ -49,12 +62,23 @@ namespace TRLogicApp.Tests
         }
 
         [Fact]
-        public void Post()
+        public void PostOne()
         {
             var mock = new Mock<IRepository<ImageEntity>>();
             var controller = new ImagesController(mock.Object);
             var result = controller.Post(new[] { _imageModels[0] }) as StatusCodeResult;
             Assert.InRange(result.StatusCode, 200, 299);
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()));
+        }
+
+        [Fact]
+        public void PostMany()
+        {
+            var mock = new Mock<IRepository<ImageEntity>>();
+            var controller = new ImagesController(mock.Object);
+            var result = controller.Post(new[] { _imageModels[0], _imageModels[1] }) as StatusCodeResult;
+            Assert.InRange(result.StatusCode, 200, 299);
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Exactly(2));
         }
     }
 }
