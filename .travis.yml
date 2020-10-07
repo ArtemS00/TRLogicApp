@@ -1,0 +1,13 @@
+  
+sudo: required
+language: csharp
+dist: bionic
+mono: none
+dotnet: 3.1.100
+install:
+- dotnet restore
+- sudo apt install libc6-dev 
+- sudo apt install libgdiplus
+script:
+- dotnet build
+- dotnet test TRLogicApp.Tests/TRLogicApp.Tests.csproj
