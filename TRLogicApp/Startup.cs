@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -34,7 +35,7 @@ namespace TRLogicApp
             services.AddScoped<IRepository<ImageEntity>, FakeImageRepository>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime)
         {
             if (env.IsDevelopment())
             {
@@ -42,6 +43,22 @@ namespace TRLogicApp
             }
 
             app.UseCors();
+
+            // Graceful shutdown
+            app.Use(async (context, next) =>
+            {
+                // Close request if app is stopping
+                if (lifetime.ApplicationStopping.IsCancellationRequested)
+                {
+                    context.Response.StatusCode = 503;
+                    await context.Response.WriteAsync("Application unavailable");
+                }
+                else
+                {
+                    await next();
+                }
+            });
+
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
