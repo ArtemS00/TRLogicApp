@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
+using System.IO;
 using System.Linq;
 using TRLogicApp.Controllers;
 using TRLogicApp.Entities;
@@ -26,12 +28,7 @@ namespace TRLogicApp.Tests
             new ImageModel() // url image
             {
                 Url = "https://static.toiimg.com/photo/72975551.cms"
-            },
-            new ImageModel() // sample1 image + url image (incorrect model)
-            {
-                Base64Data = Convert.ToBase64String(ImageConverter.FromImage(Resources.sample1)),
-                Url = "https://static.toiimg.com/photo/72975551.cms"
-            },
+            }
         };
 
         [Theory]
@@ -62,7 +59,7 @@ namespace TRLogicApp.Tests
             var controller = new ImagesController(mock.Object);
             var result = controller.Post(new[] { _imageModels[0] }) as StatusCodeResult;
             Assert.InRange(result.StatusCode, 200, 299);
-            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()));
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Once());
         }
 
         [Fact]
@@ -71,6 +68,51 @@ namespace TRLogicApp.Tests
             var mock = new Mock<IRepository<ImageEntity>>();
             var controller = new ImagesController(mock.Object);
             var result = controller.Post(new[] { _imageModels[0], _imageModels[1] }) as StatusCodeResult;
+            Assert.InRange(result.StatusCode, 200, 299);
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Exactly(2));
+        }
+
+        [Fact]
+        public void PostManyWithDifferentTypes()
+        {
+            var mock = new Mock<IRepository<ImageEntity>>();
+            var controller = new ImagesController(mock.Object);
+            var result = controller.Post(new[] { _imageModels[0], _imageModels[1], _imageModels[2] }) as StatusCodeResult;
+            Assert.InRange(result.StatusCode, 200, 299);
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Exactly(3));
+        }
+
+        [Fact]
+        public void PostOneForm()
+        { 
+            var mock = new Mock<IRepository<ImageEntity>>();
+            var controller = new ImagesController(mock.Object);
+
+            var files = new FormFileCollection();
+            var stream = new MemoryStream(Convert.FromBase64String(_imageModels[0].Base64Data));
+            files.Add(new FormFile(stream, 0, stream.Length, "sample1", "sample1"));
+
+            var result = controller.Post(files) as StatusCodeResult;
+
+            Assert.InRange(result.StatusCode, 200, 299);
+            mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Once());
+        }
+
+        [Fact]
+        public void PostManyForm()
+        {
+            var mock = new Mock<IRepository<ImageEntity>>();
+            var controller = new ImagesController(mock.Object);
+
+            var files = new FormFileCollection();
+            for (int i = 0; i < 2; i++)
+            {
+                var stream = new MemoryStream(Convert.FromBase64String(_imageModels[i].Base64Data));
+                files.Add(new FormFile(stream, 0, stream.Length, "sample1", "sample1"));
+            }
+
+            var result = controller.Post(files) as StatusCodeResult;
+
             Assert.InRange(result.StatusCode, 200, 299);
             mock.Verify(i => i.Add(It.IsAny<ImageEntity>()), Times.Exactly(2));
         }
