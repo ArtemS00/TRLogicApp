@@ -1,2 +1,5 @@
-<p>image-list works!</p>
-<img *ngFor="let image of images" [src]="image"/>
+<h1>Image list</h1>
+<img *ngFor="let image of images"
+     [src]="image.src"
+     (click)="onClick(image.id)"
+     style="margin:5px"/>

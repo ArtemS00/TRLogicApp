@@ -16,4 +16,8 @@ export class ImagesService {
   getAll() : Observable<Image[]> {
     return this.http.get<Image[]>(this.imagesUrl);
   }
+
+  get(id:number): Observable<Image> {
+    return this.http.get<Image>(this.imagesUrl + id);
+  }
 }
