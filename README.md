@@ -11,7 +11,7 @@
 - [ ] Dockerfile и docker-compose.yml, которые позволяют поднять приложение единой docker-compose up командой.
 - [x] CI интеграция (Travis CI, Circle CI, другие).
 
-
+### API
 Post API (for JSON): localhost:{port}/api/images
 
 Post API (for form-data): localhost:{port}/api/images/form
@@ -23,7 +23,7 @@ Get API (for one by id): localhost:{port}/api/images/{id}
 
 IISExpress port - 50771.
 
-
+### Example
 Example of JSON request body:
 ```json
 [{
